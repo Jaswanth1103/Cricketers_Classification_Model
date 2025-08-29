@@ -52,7 +52,7 @@ function init() {
             ]
             */
             console.log(data);
-            if (!data || data.length==0) {
+            if (!data || data.length==0 || (data[0].error)) {
                 $("#resultHolder").hide();
                 $("#divClassTable").hide();                
                 $("#error").show();
@@ -82,7 +82,7 @@ function init() {
                     $(elementName).html(proabilityScore);
                 }
             }
-            // dz.removeFile(file);            
+            //dz.removeFile(file);            
         });
     });
 

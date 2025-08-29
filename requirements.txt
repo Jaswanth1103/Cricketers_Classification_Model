@@ -1,0 +1,7 @@
+flask
+gunicorn
+opencv-python==4.5.5.64
+numpy>=1.21.0
+seaborn==0.8.1
+PyWavelets
+joblib
