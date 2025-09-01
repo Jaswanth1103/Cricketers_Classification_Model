@@ -1,9 +1,10 @@
 import joblib
 import json
+import os
 import numpy as np
 import base64
 import cv2
-from wavelet import w2d  # make sure wavelet.py exists!
+from wavelet import w2d  
 
 __class_name_to_number = {}
 __class_number_to_name = {}
@@ -48,12 +49,16 @@ def load_saved_artifacts():
     global __class_number_to_name
     global __model
 
-    with open("./artifacts/class_dictionary.json", "r") as f:
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    class_dict_path = os.path.join(base_dir, "..", "artifacts", "class_dictionary.json")
+    model_path = os.path.join(base_dir, "..", "artifacts", "saved_model.pkl")
+
+    with open(class_dict_path, "r") as f:
         __class_name_to_number = json.load(f)
         __class_number_to_name = {v: k for k, v in __class_name_to_number.items()}
 
     if __model is None:
-        with open("./artifacts/saved_model.pkl", "rb") as f:
+        with open(model_path, "rb") as f:
             __model = joblib.load(f)
 
     print("loading saved artifacts...done")
