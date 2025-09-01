@@ -1,6 +1,6 @@
-pip>=23.2.1
-setuptools>=68.0.0
-wheel>=0.40.0
+setuptools>=65.5.0
+wheel
+pip
 numpy==1.23.5
 scikit-learn==1.2.2
 PyWavelets==1.8.0
