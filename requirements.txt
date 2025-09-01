@@ -1,7 +1,9 @@
-flask
-gunicorn
+numpy==1.22.4
 opencv-python==4.5.5.64
-numpy>=1.21.0
-seaborn==0.8.1
-PyWavelets
-joblib
+scikit-learn==1.2.2
+PyWavelets==1.3.0
+joblib==1.5.2
+pandas==2.3.2
+matplotlib==3.7.1
+seaborn==0.12.2
+flask==2.3.2

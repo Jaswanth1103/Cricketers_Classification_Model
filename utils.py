@@ -4,7 +4,7 @@ import os
 import numpy as np
 import base64
 import cv2
-from .wavelet import w2d  
+from wavelet import w2d  
 
 __class_name_to_number = {}
 __class_number_to_name = {}
@@ -50,18 +50,27 @@ def load_saved_artifacts():
     global __model
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
-    class_dict_path = os.path.join(base_dir, "..", "artifacts", "class_dictionary.json")
-    model_path = os.path.join(base_dir, "..", "artifacts", "saved_model.pkl")
+    class_dict_path = os.path.join(base_dir, "artifacts", "class_dictionary.json")
+    model_path = os.path.join(base_dir, "artifacts", "saved_model.pkl")
 
     with open(class_dict_path, "r") as f:
         __class_name_to_number = json.load(f)
         __class_number_to_name = {v: k for k, v in __class_name_to_number.items()}
 
+    np_load_old = np.load
+    np.load = lambda *a, **k: np_load_old(*a, allow_pickle=True, **k)
+    __model = joblib.load("artifacts/saved_model.pkl")
+    np.load = np_load_old
+    print("Model loaded successfully!")
+
     if __model is None:
         with open(model_path, "rb") as f:
             __model = joblib.load(f)
 
+    np.load = np_load_old
+
     print("loading saved artifacts...done")
+
 
 
 def get_cv2_image_from_base64_string(b64str):
