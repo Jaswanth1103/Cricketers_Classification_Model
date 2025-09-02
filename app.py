@@ -10,8 +10,8 @@ def home():
 
 @app.route('/classify_image', methods=['GET', 'POST'])
 def classify_image_route():
-    if request.method == 'GET':
-        return ":Use PORT to classify images"
+    # if request.method == 'GET':
+    #     return ":Use PORT to classify images"
     image_data = request.form.get('image_data')
     if not image_data:
         return jsonify({'error': 'No image data received'}), 400
