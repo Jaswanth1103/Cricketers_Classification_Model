@@ -4,6 +4,10 @@ import utils
 
 app = Flask(__name__)
 
+@app.route('/', methods=['GET'])
+def home():
+    return "Cricketers Classification API is running!"
+
 @app.route('/classify_image', methods=['POST'])
 def classify_image_route():
     image_data = request.form.get('image_data')
