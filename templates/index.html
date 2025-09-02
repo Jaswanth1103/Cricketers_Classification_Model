@@ -1,145 +1,82 @@
-
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sports Person Classifier</title>
+    <title>Cricketer Classifier</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='dropzone.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='app.css') }}">
 </head>
-
 <body>
-    <nav class="navbar navbar-light bg-light justify-content-center">
-        <a class="navbar-brand" href="#">Cricketer's Classifier</a>
+    <!-- Navbar -->
+    <nav class="navbar navbar-light bg-success justify-content-center">
+        <a class="navbar-brand text-white font-weight-bold" href="#">Cricketer Classifier</a>
     </nav>
 
-    <div class="container">
-        <div class="row">
-        <div class="col card-wrapper" data-player="abd">
-                <div class="card border-0">
-                    <div class="position-relative rounded-circle overflow-hidden mx-auto custom-circle-image">
-                        <img class="w-100 h-100" src="{{ url_for('static', filename='images/abd.jpg') }}">
+    <div class="container mt-4">
+        <!-- Cricketer Gallery -->
+        <div class="row text-center" id="playersRow">
+            {% for player, img_file in [('abd','abd.jpg'), ('msd','msd.jpg'), ('sachin','sachin.jpg'), ('virat','virat.jpg'), ('yuvi','yuvi.jpg')] %}
+            <div class="col-md-2 col-sm-4 col-6 card-wrapper" data-player="{{ player }}">
+                <div class="card border-0 shadow-sm player-card">
+                    <div class="custom-circle-image">
+                        <img src="{{ url_for('static', filename='images/' + img_file) }}" alt="{{ player }}">
                     </div>
-                    <div class="card-body text-center mt-4">
-                        <h4 class="text-uppercase card-title">Ab de Villiers</h4>
-                        </p>
-                    </div>
-                </div>
-            </div>            
-            <div class="col card-wrapper" data-player="msd">
-                    <div class="card border-0">
-                        <div class="position-relative rounded-circle overflow-hidden mx-auto custom-circle-image">
-                            <img class="w-100 h-100" src="{{ url_for('static', filename='images/msd.jpg') }}">
-                        </div>
-                        <div class="card-body text-center mt-4">
-                            <h4 class="text-uppercase card-title">MS Dhoni</h4>
-                            </p>
-                        </div>
-                    </div>
-            </div>            
-            <div class="col card-wrapper" data-player="sachin">
-                    <div class="card border-0">
-                        <div class="position-relative rounded-circle overflow-hidden mx-auto custom-circle-image">
-                            <img class="w-100 h-100" src="{{ url_for('static', filename='images/sachin.jpg') }}">
-                        </div>
-                        <div class="card-body text-center mt-4">
-                            <h4 class="text-uppercase card-title">Sachin Tendulkar</h4>
-                            </p>
-                        </div>
-                    </div>
-            </div>          
-
-            <div class="col card-wrapper" data-player="virat">
-                <div class="card border-0">
-                    <div class="position-relative rounded-circle overflow-hidden mx-auto custom-circle-image">
-                        <img  class="w-100 h-100" src="{{ url_for('static', filename='images/virat.jpg') }}">
-                    </div>
-                    <div class="card-body text-center mt-4">
-                        <h4 class="text-uppercase card-title">Virat Kohli</h4>
-                        </p>
-                    </div>
-                </div>
-            </div>      
-
-            <div class="col card-wrapper" data-player="yuvi">
-                <div class="card border-0">
-                    <div class="position-relative rounded-circle overflow-hidden mx-auto custom-circle-image">
-                        <img  class="w-100 h-100" src="{{ url_for('static', filename='images/yuvi.jpg') }}">
-                    </div>
-                    <div class="card-body text-center mt-4">
-                        <h4 class="text-uppercase card-title">Yuvraj Singh</h4>
-                        </p>
+                    <div class="card-body">
+                        <h5 class="card-title text-center">{{ player|capitalize }}</h5>
                     </div>
                 </div>
             </div>
-
+            {% endfor %}
         </div>
 
-        <div class="row">
-            <div class="col-sm-4">
-                <div class="row">
-                    <div class="col-12 mx-auto">
-                        <form action="/file-upload" class="dropzone" id="dropzone">
-                            <div class="dz-message needsclick">
-                                <img src="{{ url_for('static', filename='images/upload.png') }}" width="50vw" height="50vw"><br>
-                                <span class="note needsclick">Drop files here or click to upload</span>
-                            </div>
-                        </form>
+        <!-- Main Row: Drag & Drop, Prediction, Table -->
+        <div class="row mt-4 align-items-start">
+            <!-- Drag & Drop + Classify (left) -->
+            <div class="col-md-3">
+                <form action="#" class="dropzone" id="dropzone">
+                    <div class="dz-message needsclick">
+                        <img src="{{ url_for('static', filename='images/upload.png') }}" width="60"><br>
+                        <span>Drop files here or click to upload</span>
                     </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-3 mx-auto">
-                        <button id="submitBtn" type="button" class="btn btn-success">Classify</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="col-sm-8 error" id="error" >
-                <p>Can't classify image. Classifier was not able to detect face and two eyes properly</p>    
+                </form>
+                <button id="submitBtn" class="btn btn-success btn-block mt-3">Classify Image</button>
             </div>
 
-            <div class="col-sm-4" id="resultHolder">
+            <!-- Predicted Player (center) -->
+            <div class="col-md-6 text-center" id="resultContainer">
+                <div class="error text-center" id="error">
+                    <p>Can't classify image. Ensure face and eyes are visible.</p>
+                </div>
+                <div id="resultHolder"></div>
             </div>
-            <div class="col-sm-4" id="divClassTable">
-                <table id="classTable">
+
+            <!-- Prediction Table (bottom-right) -->
+            <div class="col-md-3">
+                <table id="classTable" class="table table-striped table-bordered text-center">
+                    <thead class="thead-dark">
                         <tr>
                             <th>Player</th>
-                            <th>Probability Score</th>
+                            <th>Probability (%)</th>
                         </tr>
-                        <tr>
-                            <td>Ab de Villiers</td>
-                            <td id="score_abd"></td>
-                        </tr>
-                        <tr>
-                            <td>MS Dhoni</td>
-                            <td id="score_msd"></td>
-                        </tr>
-                        <tr>
-                            <td>Sachin Tendulkar</td>
-                            <td id="score_sachin"></td>
-                        </tr>
-                        <tr>
-                            <td>Virat Kohli</td>
-                            <td id="score_virat"></td>
-                        </tr>
-                        <tr>
-                            <td>Yuvraj Singh</td>
-                            <td id="score_yuvi"></td>
-                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Ab de Villiers</td><td id="score_abd"></td></tr>
+                        <tr><td>MS Dhoni</td><td id="score_msd"></td></tr>
+                        <tr><td>Sachin Tendulkar</td><td id="score_sachin"></td></tr>
+                        <tr><td>Virat Kohli</td><td id="score_virat"></td></tr>
+                        <tr><td>Yuvraj Singh</td><td id="score_yuvi"></td></tr>
+                    </tbody>
                 </table>
             </div>
-            
         </div>
-
     </div>
 
+    <!-- Scripts -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <script src="{{ url_for('static', filename='dropzone.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
-<!-- <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script> -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-<script src="{{ url_for('static', filename='dropzone.min.js') }}"></script>
-<script src="{{ url_for('static', filename='app.js') }}"></script>
 </html>

@@ -2,100 +2,71 @@ Dropzone.autoDiscover = false;
 
 function init() {
     let dz = new Dropzone("#dropzone", {
-        url: "/",
+        url: "/classify_image",
         maxFiles: 1,
         addRemoveLinks: true,
-        dictDefaultMessage: "Some Message",
         autoProcessQueue: false
     });
-    
+
     dz.on("addedfile", function() {
-        if (dz.files[1]!=null) {
-            dz.removeFile(dz.files[0]);        
-        }
+        if (dz.files[1] != null) dz.removeFile(dz.files[0]);
     });
 
-    dz.on("complete", function (file) {
+    dz.on("complete", function(file) {
         let imageData = file.dataURL;
-        
-        var url = "http://127.0.0.1:5000/classify_image";
 
-        $.post(url, {
-            image_data: file.dataURL
-        },function(data, status) {
-            /* 
-            Below is a sample response if you have two faces in an image lets say virat and roger together.
-            Most of the time if there is one person in the image you will get only one element in below array
-            data = [
-                {
-                    class: "viral_kohli",
-                    class_probability: [1.05, 12.67, 22.00, 4.5, 91.56],
-                    class_dictionary: {
-                        lionel_messi: 0,
-                        maria_sharapova: 1,
-                        roger_federer: 2,
-                        serena_williams: 3,
-                        virat_kohli: 4
-                    }
-                },
-                {
-                    class: "sachin",
-                    class_probability: [7.02, 23.7, 52.00, 6.1, 1.62],
-                    class_dictionary: {
-                        abd: 0,
-                        msd: 1,
-                        sachin: 2,
-                        virat: 3,
-                        yuvi: 4
+        $.post("/classify_image", { image_data: imageData })
+            .done(function(data) {
+                if (!data || data.length === 0 || data[0].error) {
+                    $("#error").show();
+                    $("#error p").text(data[0] ? data[0].error : "Unknown error");
+                    $("#resultHolder").hide();
+                    $("#classTable").hide();
+                    return;
+                }
+
+                let match = null, bestScore = -1;
+                for (let i = 0; i < data.length; i++) {
+                    let maxScore = Math.max(...data[i].class_probability);
+                    if (maxScore > bestScore) {
+                        match = data[i];
+                        bestScore = maxScore;
                     }
                 }
-            ]
-            */
-            console.log(data);
-            if (!data || data.length==0 || (data[0].error)) {
-                $("#resultHolder").hide();
-                $("#divClassTable").hide();                
+
+                if (match) {
+                    $("#error").hide();
+                    $("#resultHolder").show().html(`
+                        <img src="${$(`[data-player="${match.class}"] img`).attr('src')}" alt="${match.class}">
+                        <h5>${match.class.charAt(0).toUpperCase() + match.class.slice(1)}</h5>
+                    `);
+                    $("#classTable").show();
+
+                    let classDict = match.class_dictionary;
+                    for (let name in classDict) {
+                        let idx = classDict[name];
+                        let score = match.class_probability[idx];
+                        $(`#score_${name}`).html(score.toFixed(2));
+                    }
+                }
+            })
+            .fail(function(xhr) {
+                let errMsg = xhr.responseJSON && xhr.responseJSON.error ? xhr.responseJSON.error : "Unknown error";
                 $("#error").show();
-                return;
-            }
-            let players = ["abd", "msd", "sachin", "virat", "yuvi"];
-            
-            let match = null;
-            let bestScore = -1;
-            for (let i=0;i<data.length;++i) {
-                let maxScoreForThisClass = Math.max(...data[i].class_probability);
-                if(maxScoreForThisClass>bestScore) {
-                    match = data[i];
-                    bestScore = maxScoreForThisClass;
-                }
-            }
-            if (match) {
-                $("#error").hide();
-                $("#resultHolder").show();
-                $("#divClassTable").show();
-                $("#resultHolder").html($(`[data-player="${match.class}"`).html());
-                let classDictionary = match.class_dictionary;
-                for(let personName in classDictionary) {
-                    let index = classDictionary[personName];
-                    let proabilityScore = match.class_probability[index];
-                    let elementName = "#score_" + personName;
-                    $(elementName).html(proabilityScore);
-                }
-            }
-            //dz.removeFile(file);            
-        });
+                $("#error p").text(errMsg);
+                $("#resultHolder").hide();
+                $("#classTable").hide();
+            });
     });
 
-    $("#submitBtn").on('click', function (e) {
-        dz.processQueue();		
+    $("#submitBtn").on("click", function () {
+        dz.processQueue();
     });
 }
 
 $(document).ready(function() {
-    console.log( "ready!" );
     $("#error").hide();
     $("#resultHolder").hide();
-    $("#divClassTable").hide();
-
+    $("#classTable").hide();
     init();
 });
