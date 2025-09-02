@@ -51,15 +51,14 @@ def load_saved_artifacts():
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     class_dict_path = os.path.join(base_dir, "artifacts", "class_dictionary.json")
-    model_path = os.path.join(base_dir, "artifacts", "saved_model.pkl")
-
     with open(class_dict_path, "r") as f:
         __class_name_to_number = json.load(f)
         __class_number_to_name = {v: k for k, v in __class_name_to_number.items()}
-
+        
+    model_path = os.path.join(base_dir, "artifacts", "saved_model.pkl")
     np_load_old = np.load
     np.load = lambda *a, **k: np_load_old(*a, allow_pickle=True, **k)
-    __model = joblib.load("artifacts/saved_model.pkl")
+    __model = joblib.load(model_path)
     np.load = np_load_old
     print("Model loaded successfully!")
 
