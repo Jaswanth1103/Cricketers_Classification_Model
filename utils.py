@@ -18,16 +18,16 @@ def classify_image(image_base64_data, file_path=None):
 
     result = []
     for img in imgs:
-        scalled_raw_img = cv2.resize(img, (32, 32))
+        scalled_raw_img = cv2.resize(img, (64, 64))
         img_har = w2d(img, 'db1', 5)
-        scalled_img_har = cv2.resize(img_har, (32, 32))
+        scalled_img_har = cv2.resize(img_har, (64, 64))
         
         combined_img = np.vstack((
-            scalled_raw_img.reshape(32*32*3, 1),
-            scalled_img_har.reshape(32*32, 1)
+            scalled_raw_img.reshape(64*64*3, 1),
+            scalled_img_har.reshape(64*64, 1)
         ))
 
-        len_image_array = 32*32*3 + 32*32
+        len_image_array = 64*64*3 + 64*64
         final = combined_img.reshape(1, len_image_array).astype(float)
 
         result.append({
@@ -55,7 +55,7 @@ def load_saved_artifacts():
         __class_name_to_number = json.load(f)
         __class_number_to_name = {v: k for k, v in __class_name_to_number.items()}
         
-    model_path = os.path.join(base_dir, "artifacts", "saved_model.pkl")
+    model_path = os.path.join(base_dir, "artifacts", "resaved_model.pkl")
     np_load_old = np.load
     np.load = lambda *a, **k: np_load_old(*a, allow_pickle=True, **k)
     __model = joblib.load(model_path)
