@@ -16,6 +16,5 @@ def classify_image_route():
 
 if __name__ == "__main__":
     print("Starting Flask Server for Cricketer Classification...")
-    utils.load_saved_artifacts()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
